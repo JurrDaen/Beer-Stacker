@@ -43,6 +43,8 @@ char b;                                                //Character voor de seriÃ
 
 void setup() 
 {
+  stepper.setMaxSpeed(600);                            //Maximale snelheid voor de steppermotor. 600Hz
+  stepper.setAcceleration(500);                        //Maximale acceleratie voor de steppermotor.
   BT.begin(9600);                                      //Bluetoothsneldheid initialiseren
   Serial.begin(9600);                                  //SeriÃ«le snelheid initialiseren
   FastLED.clear();                                     //LEDs uitzetten
@@ -227,7 +229,6 @@ void euroKrat()                                        //Deze functie wordt aang
 {
   lcd.setCursor (0, 1);                                //Zet de cursor van het LCD op de 2e regel
   lcd.print("Eurokrat      ");                         //Geeft aan op het LCD welk kratje getilt wordt
-  Serial.println("Type: Eurokrat");   
   readingSensorAfstand();                              //Leest de sensorafstand
   Neerzetten(21150);                                   //Geeft de hoogte mee die nodig is voor het neerzetten
   if (cm >= 8 && cm <= 12)                             //Als de waarde cm tussen 10 en 25 is, zal de LED groen worden
