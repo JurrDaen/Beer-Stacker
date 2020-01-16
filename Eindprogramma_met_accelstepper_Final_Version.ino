@@ -1,6 +1,6 @@
-/* 
- *  Programma voor de Beer Stacker 
- */
+/*
+    Programma voor de Beer Stacker
+*/
 
 #include <FastLED.h>                                   //Bibliotheek voor de WS2812B
 #include <Wire.h>                                      //I2C bibliotheek
@@ -26,9 +26,9 @@ AccelStepper stepper(1, 2, 10);                        //pin2 = step, pin 10 = d
 
 long duration, cm;                                     //intitialiseren van de tijd en afstand
 long initial_homing = -1;                              //Startpunt voor de steppermotor
-           
-void bierKrat();                                       //initialiseren bierkrat functie 
-void euroKrat();                                       //initialiseren eurokrat functie 
+
+void bierKrat();                                       //initialiseren bierkrat functie
+void euroKrat();                                       //initialiseren eurokrat functie
 void starting();                                       //initialiseren starting functie
 void readingSensorAfstand();                           //initialiseren readingSensorAfstand functie
 void GreenLight();                                     //initialiseren GreenLight functie
@@ -39,9 +39,9 @@ void homing();                                         //initialiseren homing fu
 
 char a;                                                //Character voor de seriële communicatie
 char b;                                                //Character voor de seriële communicatie
+char laatsteCharacter;
 
-
-void setup() 
+void setup()
 {
   stepper.setMaxSpeed(600);                            //Maximale snelheid voor de steppermotor. 600Hz
   stepper.setAcceleration(500);                        //Maximale acceleratie voor de steppermotor.
@@ -53,34 +53,34 @@ void setup()
   lcd.begin (16, 2); // for 16 x 2 LCD module          //Grote van het LCD scherm wordt ingesteld
   lcd.setBacklightPin(3, POSITIVE);                    //Backlight van het LCD instellen
   lcd.setBacklight(HIGH);                              //Zet de backlight aan van het LCD
-  
-  pinMode(trigPin1, OUTPUT);                           //Trigpin 
-  pinMode(echoPin1, INPUT);                            //Vangt het hoog frequente signaal op voor de afstandssensor                        
+
+  pinMode(trigPin1, OUTPUT);                           //Trigpin
+  pinMode(echoPin1, INPUT);                            //Vangt het hoog frequente signaal op voor de afstandssensor
   pinMode(upperLimitSwitch, INPUT);
- 
+
   starting();                                          //Startanimatie weergeven
   homing();                                            //Homing van de stepper motor
 }
 
 
-void loop() 
+void loop()
 {
- if (BT.available())                                    //Leest of er een bluetooth signaal binnenkomt
- {
-  a = (BT.read());                                      //Leest wat het bluetooth signaal inhoud 
-  if (a=='A')                                           //A is een waarde die vanaf de app wordt verstuurd
+  if (BT.available()>0)                                    //Leest of er een bluetooth signaal binnenkomt
   {
-    buttonPushSelector = 1;
+    laatsteCharacter = (BT.read());                                      //Leest wat het bluetooth signaal inhoud
+    if (laatsteCharacter == 'A')                                         //A is een waarde die vanaf de app wordt verstuurd
+    {
+      buttonPushSelector = 1;
+    }
+    if (laatsteCharacter == 'B')                                         //B is een waarde die vanaf de app wordt verstuurd
+    {
+      buttonPushSelector = 2;
+    }
   }
-  if (a=='B')                                           //B is een waarde die vanaf de app wordt verstuurd
-  {
-    buttonPushSelector = 2;
-  }
- }
   switch (buttonPushSelector)                           //Een switch om de keuze te maken tussen de verschillende kratjes op basis van een variabele.
   {
     case 1:
-      bierKrat();                                 
+      bierKrat();
       break;
     case 2:
       euroKrat();
@@ -90,41 +90,41 @@ void loop()
 
 
 void homing()
-{   
-  lcd.setCursor (0, 0);                                //LCD cursor links bovenaan neerzetten  
+{
+  lcd.setCursor (0, 0);                                //LCD cursor links bovenaan neerzetten
   lcd.print("Homing...       ");
-  while(digitalRead(upperLimitSwitch) == LOW)          //Zolang de upperlimit switch niet wordt ingedrukt beweegt de motor omhoog
+  while (digitalRead(upperLimitSwitch) == LOW)         //Zolang de upperlimit switch niet wordt ingedrukt beweegt de motor omhoog
   {
     stepper.moveTo(initial_homing);                    //Zorgt er voor dat de motor omhoog beweegt
     initial_homing--;                                  //Zet de stap weer op 1 lager waardoor de motor weer omhoog zal bewegen
     stepper.run();                                     //Laat de motor een stap zetten
     delay(3);                                          //Zorgt er voor dat de motor op 300Hz draait
   }
-  
+
   stepper.setCurrentPosition(0);                       //Zet de positie van de stepper motor op 0
-  delay(1000);                                         
+  delay(1000);
   stepper.moveTo(1000);                                //Zet 1000 stappen omlaag
-  while(stepper.distanceToGo() !=0)                    //Zolang de stapper motor nog geen stap heeft gezet blijft hij in de loop
-  {                         
+  while (stepper.distanceToGo() != 0)                  //Zolang de stapper motor nog geen stap heeft gezet blijft hij in de loop
+  {
     stepper.run();                                     //Laat de motor een stap zetten
   }
-      
-  delay(5); 
+
+  delay(5);
   stepper.setCurrentPosition(0);                       //Zet de positie van de stpper motor op 0
   stepper.setMaxSpeed(700);                            //Maximale snelheid voor de steppermotor. 700Hz
   stepper.setAcceleration(400);                        //Maximale acceleratie voor de steppermotor.
 }
 
 
-void starting() 
+void starting()
 {
-  lcd.setCursor (0, 0);                              
-  lcd.print("Lifter starting  ");                         
+  lcd.setCursor (0, 0);
+  lcd.print("Lifter starting  ");
   for (int x = 0; x < 4; x++)                          //Loop voor het herhalen van het effect
   {
     for (int j = 0; j < 256; j++)                      //Loop voor het feller worden van de LED's
     {
-      for (int i = 0; i < NUM_LEDS; i++)               //Loop voor het tellen van de LED's 
+      for (int i = 0; i < NUM_LEDS; i++)               //Loop voor het tellen van de LED's
       {
         led[i] = CRGB(j, 0, j);
       }
@@ -142,71 +142,65 @@ void starting()
     }
   }
 
-}            
+}
 
 
 void Tillen(int Hoogte)                                //Deze functie krijgt de hoogte mee afhankelijk van het kratje en zorgt dat het kratje wordt opgetilt
 {
-  if (BT.available())                                  //Kijkt of er wat binnen komt via bluetooth
-  {
-    b = (BT.read());                                   //Leest wat er binnen komt via bluetooth
-    if (b=='C')                                        //Als er een C binnen komt via bluetooth gaat hij tillen
-    {   
-    stepper.moveTo(Hoogte);                            //Stelt de afstand in
-    while(stepper.distanceToGo() !=0)                  //Zolang hij het aantal stappen nog niet heeft gedaan komt hij hier in
+  Serial.println("Klik op de knop");
+    if (laatsteCharacter == 'C')
     {
-      stepper.run();
-    }
-      
-    }
-    delay(2000);                                       //Wacht 2 seconden
+      Serial.println("Tillen..");
+      stepper.moveTo(Hoogte);                            //Zet het kratje weer neer op de grond
+      while (stepper.distanceToGo() != 0)                //Kijkt of het aantal stappen al zijn gedaan
+      {
+        stepper.run();
+      }
+          delay(1000);                                       //Wacht 2 seconden
     stepper.moveTo(14000);                             //Ga naar een hoogte van 14000
-    while(stepper.distanceToGo() !=0)                  //Zolang hij het aantal stappen nog niet heeft gedaan komt hij hier in
+    while (stepper.distanceToGo() != 0)                //Zolang hij het aantal stappen nog niet heeft gedaan komt hij hier in
     {
       stepper.run();
     }
-
-  }
+    }
+    laatsteCharacter = 0;
 }
 
+
 void Neerzetten(int Hoogte)                            //Deze functie zorgt dat hij het desbetreffende kratje ook weer neer kan zetten
-{
-  if (BT.available())                                  //Kijkt of er wat binnen komt via bluetooth
-  {
-    b = (BT.read());                                   //Leest wat er binnen komt via bluetooth
-    if (b=='D')
+{                            //Leest wat er binnen komt via bluetooth
+    if (laatsteCharacter == 'D')
     {
-    stepper.moveTo(Hoogte);                            //Zet het kratje weer neer op de grond
-    while(stepper.distanceToGo() !=0)                  //Kijkt of het aantal stappen al zijn gedaan
-    {
-      stepper.run();                                    
-    }
-      
-    }
-    delay(2000);                                       //Wacht 2 seconden
+      Serial.println("Neerzetten");
+      stepper.moveTo(Hoogte);                            //Zet het kratje weer neer op de grond
+      while (stepper.distanceToGo() != 0)                //Kijkt of het aantal stappen al zijn gedaan
+      {
+        stepper.run();
+      }
+          delay(1000);                                       //Wacht 2 seconden
     stepper.moveTo(14000);                             //Ga naar een hoogte van 14000
-    while(stepper.distanceToGo() !=0)                  //Zolang hij het aantal stappen nog niet heeft gedaan komt hij hier in
+    while (stepper.distanceToGo() != 0)                //Zolang hij het aantal stappen nog niet heeft gedaan komt hij hier in
     {
       stepper.run();
     }
-
-  }
+    }
 }
 
 void bierKrat()                                        //Deze functie wordt aangreoepen als het bierkrat gekozen is
 {
   lcd.setCursor (0, 1);                                //Zet de cursor van het LCD op de 2e regel
   lcd.print("Bierkrat      ");                         //Geeft aan op het LCD welk kratje getilt wordt
-  readingSensorAfstand();                              //Leest de afstand 
+  readingSensorAfstand();                              //Leest de afstand
   Neerzetten(24900);                                   //Geeft de hoogte mee die nodig is voor het neerzetten
   if (cm >= 10 && cm <= 15)                            //Als de waarde cm tussen 10 en 15 is, zal de LED groen worden
   {
     GreenLight();
-    delay(1);
+    //delay(1);
     Tillen(24900);
-    
+    laatsteCharacter = 'A';
+   // Serial.println("Wachten op tillen");
   }
-  else if (cm >= 16 && cm <= 30)                      //Als de waarde cm tussen de 16 en 30 is, zal de LED geel worden 
+  else if (cm >= 16 && cm <= 30)                      //Als de waarde cm tussen de 16 en 30 is, zal de LED geel worden
   {
     YellowLight();
   }
@@ -215,7 +209,7 @@ void bierKrat()                                        //Deze functie wordt aang
     BlueLight();
   }
   else if (cm <= 9)                                    //Als de waarde cm kleiner is dan 9, zal de LED rood worden
-  {                
+  {
     RedLight();
   }
   lcd.home (); // set cursor to 0,0
@@ -232,13 +226,14 @@ void euroKrat()                                        //Deze functie wordt aang
   readingSensorAfstand();                              //Leest de sensorafstand
   Neerzetten(21150);                                   //Geeft de hoogte mee die nodig is voor het neerzetten
   if (cm >= 8 && cm <= 12)                             //Als de waarde cm tussen 10 en 25 is, zal de LED groen worden
-  {        
+  {
     GreenLight();
     delay(1);
     Tillen(21150);
+    laatsteCharacter = 'B';
   }
   else if (cm >= 13 && cm <= 30)                       //Als de waarde cm tussen de 26 en 79 is, zal de LED geel worden
-  {  
+  {
     YellowLight();
   }
   else if (cm >= 31)                                   //Als de waarde cm boven de 80 is, zal de LED blauw worden
@@ -250,14 +245,14 @@ void euroKrat()                                        //Deze functie wordt aang
     RedLight();
   }
   lcd.home ();                                         //Set de cursor op 0,0
-  lcd.print(F("Afstand: "));           
+  lcd.print(F("Afstand: "));
   lcd.print(cm);                                       //Print de afstand op het LCD in cm
-  lcd.print(F(" cm    "));            
+  lcd.print(F(" cm    "));
 }
 
 void readingSensorAfstand()                            //Leest de sensor voor de afstand uit
 {
-  digitalWrite(trigPin1, LOW);                          
+  digitalWrite(trigPin1, LOW);
   delayMicroseconds(5);
   digitalWrite(trigPin1, HIGH);                        //Verstuurd een geluidssignaal
   delayMicroseconds(10);
@@ -268,7 +263,7 @@ void readingSensorAfstand()                            //Leest de sensor voor de
 
 void RedLight()                                        //Zorgt er voor dat de LED rood licht kan geven
 {
-  for (int i = 0; i < NUM_LEDS; i++) 
+  for (int i = 0; i < NUM_LEDS; i++)
   {
     led[i] = CRGB(153, 0, 0);                          //Rood
   }
@@ -278,7 +273,7 @@ void RedLight()                                        //Zorgt er voor dat de LE
 
 void YellowLight()                                     //Zorgt er voor dat de LED geel licht kan geven
 {
-  for (int i = 0; i < NUM_LEDS; i++) 
+  for (int i = 0; i < NUM_LEDS; i++)
   {
     led[i] = CRGB(153, 153, 0);                        //Geel
   }
@@ -288,7 +283,7 @@ void YellowLight()                                     //Zorgt er voor dat de LE
 
 void GreenLight()                                      //Zorgt er voor dat de LED groen licht kan geven
 {
-  for (int i = 0; i < NUM_LEDS; i++) 
+  for (int i = 0; i < NUM_LEDS; i++)
   {
     led[i] = CRGB(0, 153, 0);                          //Groen
   }
@@ -298,7 +293,7 @@ void GreenLight()                                      //Zorgt er voor dat de LE
 
 void BlueLight()                                       //Zorgt er voor dat de LED blauw licht kan geven
 {
-  for (int i = 0; i < NUM_LEDS; i++) 
+  for (int i = 0; i < NUM_LEDS; i++)
   {
     led[i] = CRGB(0, 0, 153);                          //Blauw
   }
