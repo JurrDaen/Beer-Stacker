@@ -37,9 +37,7 @@ void RedLight();                                       //initialiseren RedLight 
 void BlueLight();                                      //initialiseren BlueLight functie
 void homing();                                         //initialiseren homing functie
 
-char a;                                                //Character voor de seriële communicatie
-char b;                                                //Character voor de seriële communicatie
-char laatsteCharacter;
+char laatsteCharacter;                                 //Character om de buffer uit het bluetooth register te halen
 
 void setup()
 {
@@ -198,20 +196,24 @@ void bierKrat()                                        //Deze functie wordt aang
     //delay(1);
     Tillen(24900);
     laatsteCharacter = 'A';
-   // Serial.println("Wachten op tillen");
+    Serial.print("b");
   }
   else if (cm >= 16 && cm <= 30)                      //Als de waarde cm tussen de 16 en 30 is, zal de LED geel worden
   {
     YellowLight();
+    Serial.print("c");
   }
   else if (cm >= 31)                                   //Als de waarde cm boven de 31 is, zal de LED blauw worden
   {
     BlueLight();
+    Serial.print("d");
   }
   else if (cm <= 9)                                    //Als de waarde cm kleiner is dan 9, zal de LED rood worden
   {
     RedLight();
+    Serial.print("a");
   }
+  
   lcd.home (); // set cursor to 0,0
   lcd.print(F("Afstand: "));
   lcd.print(cm);
@@ -231,18 +233,22 @@ void euroKrat()                                        //Deze functie wordt aang
     delay(1);
     Tillen(21150);
     laatsteCharacter = 'B';
+    Serial.print("b");
   }
   else if (cm >= 13 && cm <= 30)                       //Als de waarde cm tussen de 26 en 79 is, zal de LED geel worden
   {
     YellowLight();
+    Serial.print("c");
   }
   else if (cm >= 31)                                   //Als de waarde cm boven de 80 is, zal de LED blauw worden
   {
     BlueLight();
+    Serial.print("d");
   }
   else if (cm <= 7)                                    //Als de waarde cm kleiner is dan 9, zal de LED rood worden
   {
     RedLight();
+    Serial.print("a");
   }
   lcd.home ();                                         //Set de cursor op 0,0
   lcd.print(F("Afstand: "));
