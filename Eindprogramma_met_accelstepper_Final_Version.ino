@@ -91,6 +91,11 @@ void homing()
 {
   lcd.setCursor (0, 0);                                //LCD cursor links bovenaan neerzetten
   lcd.print("Homing...       ");
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    led[i] = CRGB(153, 153, 153);                          //Rood
+  }
+  FastLED.show();
   while (digitalRead(upperLimitSwitch) == LOW)         //Zolang de upperlimit switch niet wordt ingedrukt beweegt de motor omhoog
   {
     stepper.moveTo(initial_homing);                    //Zorgt er voor dat de motor omhoog beweegt
@@ -106,8 +111,13 @@ void homing()
   {
     stepper.run();                                     //Laat de motor een stap zetten
   }
-
+  
   delay(5);
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    led[i] = CRGB(0, 0, 0);                          //Rood
+  }
+  FastLED.show();
   stepper.setCurrentPosition(0);                       //Zet de positie van de stpper motor op 0
   stepper.setMaxSpeed(700);                            //Maximale snelheid voor de steppermotor. 700Hz
   stepper.setAcceleration(400);                        //Maximale acceleratie voor de steppermotor.
@@ -145,10 +155,8 @@ void starting()
 
 void Tillen(int Hoogte)                                //Deze functie krijgt de hoogte mee afhankelijk van het kratje en zorgt dat het kratje wordt opgetilt
 {
-  Serial.println("Klik op de knop");
     if (laatsteCharacter == 'C')
     {
-      Serial.println("Tillen..");
       stepper.moveTo(Hoogte);                            //Zet het kratje weer neer op de grond
       while (stepper.distanceToGo() != 0)                //Kijkt of het aantal stappen al zijn gedaan
       {
@@ -169,7 +177,6 @@ void Neerzetten(int Hoogte)                            //Deze functie zorgt dat 
 {                            //Leest wat er binnen komt via bluetooth
     if (laatsteCharacter == 'D')
     {
-      Serial.println("Neerzetten");
       stepper.moveTo(Hoogte);                            //Zet het kratje weer neer op de grond
       while (stepper.distanceToGo() != 0)                //Kijkt of het aantal stappen al zijn gedaan
       {
@@ -248,7 +255,7 @@ void euroKrat()                                        //Deze functie wordt aang
   else if (cm <= 7)                                    //Als de waarde cm kleiner is dan 9, zal de LED rood worden
   {
     RedLight();
-    Serial.print("a");
+    Serial.print("a"); 
   }
   lcd.home ();                                         //Set de cursor op 0,0
   lcd.print(F("Afstand: "));
